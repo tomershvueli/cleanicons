@@ -29,9 +29,6 @@ class App extends Component {
   componentDidMount() {
     const font = '900 48px "Font Awesome 5 Free"';
 
-    // Chrome 76+ won't load the font
-    // until it's needed by the ducument (i.e one of the characters is displayed)
-    // or explicitely loaded through FontFaceSet API.
     document.fonts.load(font).then((_) => {
       this.drawCanvasContent();
     });
@@ -42,25 +39,70 @@ class App extends Component {
       console.log("drawing")
       const canvas = this.canvas.current;
       const ctx = canvas.getContext("2d");
-      const canvasWidth = canvas.width;
+      const canvasWidth = 1024;
+      const canvasHeight = 1024;
 
       const font = `900 ${canvasWidth}px "Font Awesome 5 Free"`;
       const textString = '\uF063',
         textWidth = ctx.measureText(textString).width;
 
       // Clear canvas first
-      ctx.clearRect(0, 0, canvasWidth, canvas.height);
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       ctx.font = font;
 
       // Background
       if (!this.state.transparentBg) {
         ctx.fillStyle = this.state.bgColor;
-        ctx.fillRect(0, 0, canvasWidth, canvas.height);
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       }
 
+      // var data = "data:image/svg+xml,"+"<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>" +
+      //            "<foreignObject width='100%' height='100%'>" +
+      //              "<div xmlns='http://www.w3.org/1999/xhtml' style='font-size:240px'>" +
+      //                "<div xmlns='http://www.w3.org/1999/xhtml'>aaaa</div>" +
+      //              "</div>" +
+      //            "</foreignObject>" +
+      //          "</svg>"
+      //       ;
+
+      //       var img = new Image();
+
+      //       img.src = data;
+            
+      const dpr = window.devicePixelRatio;
+
       ctx.fillStyle = this.state.color;
-      ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvas.height - (canvas.height / 8));
+      ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvasHeight - (canvasHeight / 8));
+      // canvas.width = canvasWidth * window.devicePixelRatio;
+      // canvas.height = canvasHeight * window.devicePixelRatio;
+      ctx.scale = dpr;
+      canvas.style.width = `${canvasWidth / dpr}px`;
+      canvas.style.height = `${canvasHeight / dpr}px`;
+      
+  //     var img = new Image();
+  //     img.onload = function() {
+  //       console.log("loaded")
+  //       const height = img.height; //600;
+  //       const width = img.width; //600;
+  //       // debugger
+  //         // ctx.drawImage(img, 0, 0);
+  //         ctx.imageSmoothingEnabled = false
+  //         canvas.width = width * window.devicePixelRatio;
+  // canvas.height = height * window.devicePixelRatio;
+  // canvas.style.width = `${width}px`;
+  // canvas.style.height = `${height}px`;
+  // ctx.drawImage(
+  //   img, 0, 0, 
+  //   width * window.devicePixelRatio, 
+  //   height * window.devicePixelRatio
+  // );
+  //     }
+
+      // ctx.translate(canvas.width / 2, canvas.height / 2);
+      //       ctx.scale(0.4, 0.4);
+      // img.src = "http://localhost:3000/solid/ad.svg";
+      // img.src = "https://upload.wikimedia.org/wikipedia/en/0/09/Circle_Logo.svg";
     }
   }
 
@@ -139,7 +181,7 @@ class App extends Component {
             </form>
           </div>
           <div id="preview-wrap" className="col">
-            <canvas id="canvas" width={this.state.size} height={this.state.size} ref={this.canvas}></canvas>
+            <canvas id="canvas" width="1024" height="1024" ref={this.canvas}></canvas>
           </div>
         </div>
       </div>
