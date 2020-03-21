@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { Dropdown } from 'semantic-ui-react'
 const icons = require("./utils/icons");
 
 class App extends Component {
@@ -34,6 +34,21 @@ class App extends Component {
     });
   }
 
+  faUnicode(name) {
+    var testI = document.createElement('i');
+    var char;
+  
+    testI.className = 'fa fa-' + name;
+    document.body.appendChild(testI);
+  
+    char = window.getComputedStyle( testI, ':before' )
+             .content.replace(/'|"/g, '');
+
+    testI.remove();
+  
+    return char;
+  }
+
   drawCanvasContent() {
     if (this.canvas.current) {
       console.log("drawing")
@@ -43,7 +58,7 @@ class App extends Component {
       const canvasHeight = 1024;
 
       const font = `900 ${canvasWidth}px "Font Awesome 5 Free"`;
-      const textString = '\uF063',
+      const textString = this.faUnicode(this.state.icon),//'\uF063',
         textWidth = ctx.measureText(textString).width;
 
       // Clear canvas first
@@ -161,7 +176,16 @@ class App extends Component {
         <div id="main-wrap">
           <div id="adjust-wrap" className="col">
             <form name="adjust-form" onSubmit={this.downloadIcon}>
-              <label>Icon:</label>
+              <label>
+                Icon:
+                {/* <Dropdown
+                  placeholder='Select Icon'
+                  fluid
+                  search
+                  selection
+                  options={icons}
+                /> */}
+              </label>
               <label>
                 Size:
                 <input type="range" min="1" max="512" step="1" value={this.state.size} onChange={this.handleSizeChange} />
