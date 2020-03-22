@@ -28,8 +28,20 @@
 }
 
 .color-input input {
-  height: 50px;
+  height: auto;
+}
+
+.transparent-bg-input {
+  margin-bottom: 8px;
+}
+
+.select-option:hover {
+  background-color: #61dafb;
+}
+
+.select-option .icon-wrap {
+  float: right;
 }
 
 body{ background-color: ivory; }
-#canvas{border:1px solid red; margin:0 auto;}
+#canvas{border:1px solid rgb(65, 65, 65); margin:0 auto;}

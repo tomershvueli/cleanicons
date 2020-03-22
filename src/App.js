@@ -15,10 +15,10 @@ class App extends Component {
     this.state = {
       icon: "font-awesome", // TODO random
       color: "#ff004f",
-      size: "100px",
+      size: "100",
       transparentBg: true,
       fontFamily: "Font Awesome 5 Brands",
-      bgColor: "",
+      bgColor: "#ffffff",
       unicode: "F2B4",
       icons: [],
       fontsLoaded: false
@@ -124,6 +124,18 @@ class App extends Component {
       if (!this.state.transparentBg) {
         ctx.fillStyle = this.state.bgColor;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      } else {
+        // Create transparent 'checkered' background
+        const patternCanvas = document.createElement('canvas');
+        const patternContext = patternCanvas.getContext('2d');
+        patternCanvas.width = 40;
+        patternCanvas.height = 40;
+        patternContext.fillStyle = "#d5d5d5";
+        patternContext.fillRect(0,0,20,20);
+        patternContext.fillRect(20,20,20,20);
+        var pattern = ctx.createPattern(patternCanvas, "repeat");
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       }
 
       const dpr = window.devicePixelRatio;
@@ -191,14 +203,15 @@ class App extends Component {
     });
   }
 
-  customSingleValue(props) {
+  customOptionComponent(props) {
     delete props.innerProps.onMouseMove;
     delete props.innerProps.onMouseOver;
     const {data, innerProps, isFocused, ...otherProps} = props;
     const newProps = {innerProps: {...innerProps}, ...otherProps};
     return (
       <components.Option {...newProps} className="select-option">
-        {props.children}{data.icon && <i className={`${data.baseClass} fa-${data.icon}`} />}
+        {props.children}
+        <span className="icon-wrap">{data.icon && <i className={`${data.baseClass} fa-${data.icon}`} />}</span>
       </components.Option>
     );
   }
@@ -222,29 +235,28 @@ class App extends Component {
                     <label>
                       Icon:
                       <Select
-                        filterOption={createFilter({ ignoreAccents: false })} // this makes all the difference!
+                        filterOption={createFilter({ ignoreAccents: false })}
                         onChange={this.handleIconChange}
                         options={this.state.icons}
                         defaultInputValue={this.state.icon}
-                        components={ {Option: this.customSingleValue } }
+                        components={ {Option: this.customOptionComponent } }
                       />
                     </label>
                   </Form.Field>
-                  <Form.Field inline>
+                  <Form.Field>
                     <label>
-                      Size:
-                      <Input type="range" min="1" max="512" step="1" value={this.state.size} onChange={this.handleSizeChange} />
+                      Size: <span id="icon-size">{this.state.size}px</span>
+                      <Input type="range" min="32" max="1024" step="1" value={this.state.size} onChange={this.handleSizeChange} />
                     </label>
                   </Form.Field>
                   <Form.Field>
-                      <Input label="Color:" type="color" value={this.state.color} onChange={this.handleColorChange} />
+                      <Input label="Color:" type="color" className="color-input" value={this.state.color} onChange={this.handleColorChange} />
                   </Form.Field>
                   <Form.Field>
                     <label>
-                      Background Color:
-                      <Checkbox checked={this.state.transparentBg} onChange={this.handleTransparentBgToggle} label="Transparent" />
+                      <Checkbox checked={this.state.transparentBg} className="transparent-bg-input" onChange={this.handleTransparentBgToggle} label="Transparent Background" />
                       {!this.state.transparentBg &&
-                        <Input inline type="color" value={this.state.bgColor} onChange={this.handleBackgroundColorChange} />
+                        <Input label="Background Color:" type="color" className="color-input" value={this.state.bgColor} onChange={this.handleBackgroundColorChange} />
                       }
                     </label>
                   </Form.Field>
