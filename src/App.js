@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Dropdown } from 'semantic-ui-react'
-const icons = require("./utils/icons");
+import Select, { createFilter, components } from 'react-select';
+
+var opentype = require('opentype.js');
 
 class App extends Component {
 
@@ -11,15 +12,20 @@ class App extends Component {
     this.canvas = React.createRef();
 
     this.state = {
-      icon: "star", // TODO random
+      icon: "glass-martini", // TODO random
       color: "#ff004f",
       size: "100px",
       transparentBg: true,
-      bgColor: ""
+      fontFamily: "Font Awesome 5 Free",
+      bgColor: "",
+      unicode: "",
+      icons: []
     };
 
+    this.loadFonts = this.loadFonts.bind(this);
     this.drawCanvasContent = this.drawCanvasContent.bind(this);
     this.downloadIcon = this.downloadIcon.bind(this);
+    this.handleIconChange = this.handleIconChange.bind(this);
     this.handleSizeChange = this.handleSizeChange.bind(this);
     this.handleColorChange = this.handleColorChange.bind(this);
     this.handleBackgroundColorChange = this.handleBackgroundColorChange.bind(this);
@@ -27,26 +33,68 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const font = '900 48px "Font Awesome 5 Free"';
+    const fontAwesomeRegular = '900 48px "Font Awesome 5 Free"';
+    const fontAwesomeBrand = '900 48px "Font Awesome 5 Brands"';
 
-    document.fonts.load(font).then((_) => {
+    document.fonts.load(fontAwesomeRegular, fontAwesomeBrand).then((_) => {
       this.drawCanvasContent();
+    });
+
+    this.loadFonts();
+  }
+
+  async loadFonts() {
+    const fonts = [await this.loadFont('fonts/fa-solid-900.ttf'), await this.loadFont('fonts/fa-brands-400.ttf')];
+
+    let tempIcons = [];
+
+    for (let font of fonts) {
+      const fontFamily = font.names.preferredFamily.en;
+      for (const glyph in font.glyphs.glyphs) {
+        if (font.glyphs.glyphs.hasOwnProperty(glyph)) {
+          const element = font.glyphs.glyphs[glyph];
+          const baseClass = (fontFamily === 'Font Awesome 5 Free') ? 'fas' : 'fab';
+
+          if (element.unicode) {
+            // We're looking at a 'real' icon
+            const icon = {
+              key: element.id,
+              value: element.name,
+              label: element.name,
+              fontFamily,
+              unicode: element.unicode,
+              icon: element.name,
+              baseClass
+            }
+            tempIcons.push(icon);
+          } 
+        }
+      }
+    }
+
+    tempIcons.sort((a, b) => a.value > b.value);
+
+    this.setState({
+      icons: tempIcons
     });
   }
 
-  faUnicode(name) {
-    var testI = document.createElement('i');
-    var char;
-  
-    testI.className = 'fa fa-' + name;
-    document.body.appendChild(testI);
-  
-    char = window.getComputedStyle( testI, ':before' )
-             .content.replace(/'|"/g, '');
+  // Fix for opentype async/await, https://github.com/opentypejs/opentype.js/issues/406
+  async loadFont(url) {
+    return await new Promise(
+      (resolve, reject) => opentype.load(
+        url, (err, font) => err ? reject(err) : resolve(font)
+      )
+    )
+  }
 
-    testI.remove();
-  
-    return char;
+  formatUnicode(unicode) {
+    unicode = unicode.toString(16);
+    if (unicode.length > 4) {
+        return ("000000" + unicode.toUpperCase()).substr(-6)
+    } else {
+        return ("0000" + unicode.toUpperCase()).substr(-4)
+    }
   }
 
   drawCanvasContent() {
@@ -57,8 +105,8 @@ class App extends Component {
       const canvasWidth = 1024;
       const canvasHeight = 1024;
 
-      const font = `900 ${canvasWidth}px "Font Awesome 5 Free"`;
-      const textString = this.faUnicode(this.state.icon),//'\uF063',
+      const font = `900 ${canvasWidth}px "${this.state.fontFamily}"`;
+      const textString = String.fromCharCode(parseInt(this.state.unicode, 16)),//this.faUnicode(this.state.icon),//'\uF063',
         textWidth = ctx.measureText(textString).width;
 
       // Clear canvas first
@@ -72,19 +120,6 @@ class App extends Component {
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       }
 
-      // var data = "data:image/svg+xml,"+"<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>" +
-      //            "<foreignObject width='100%' height='100%'>" +
-      //              "<div xmlns='http://www.w3.org/1999/xhtml' style='font-size:240px'>" +
-      //                "<div xmlns='http://www.w3.org/1999/xhtml'>aaaa</div>" +
-      //              "</div>" +
-      //            "</foreignObject>" +
-      //          "</svg>"
-      //       ;
-
-      //       var img = new Image();
-
-      //       img.src = data;
-            
       const dpr = window.devicePixelRatio;
 
       ctx.fillStyle = this.state.color;
@@ -94,30 +129,6 @@ class App extends Component {
       ctx.scale = dpr;
       canvas.style.width = `${canvasWidth / dpr}px`;
       canvas.style.height = `${canvasHeight / dpr}px`;
-      
-  //     var img = new Image();
-  //     img.onload = function() {
-  //       console.log("loaded")
-  //       const height = img.height; //600;
-  //       const width = img.width; //600;
-  //       // debugger
-  //         // ctx.drawImage(img, 0, 0);
-  //         ctx.imageSmoothingEnabled = false
-  //         canvas.width = width * window.devicePixelRatio;
-  // canvas.height = height * window.devicePixelRatio;
-  // canvas.style.width = `${width}px`;
-  // canvas.style.height = `${height}px`;
-  // ctx.drawImage(
-  //   img, 0, 0, 
-  //   width * window.devicePixelRatio, 
-  //   height * window.devicePixelRatio
-  // );
-  //     }
-
-      // ctx.translate(canvas.width / 2, canvas.height / 2);
-      //       ctx.scale(0.4, 0.4);
-      // img.src = "http://localhost:3000/solid/ad.svg";
-      // img.src = "https://upload.wikimedia.org/wikipedia/en/0/09/Circle_Logo.svg";
     }
   }
 
@@ -139,6 +150,15 @@ class App extends Component {
       // delete the internal blob reference, to let the browser clear memory from it
       URL.revokeObjectURL(link.href);
     }, 'image/png');
+  }
+
+  handleIconChange(e) {
+    const unicode = this.formatUnicode(e.unicode)
+    this.setState({
+      icon: e.value,
+      fontFamily: e.fontFamily,
+      unicode
+    });
   }
 
   handleSizeChange(e) {
@@ -165,6 +185,18 @@ class App extends Component {
     });
   }
 
+  customSingleValue(props) {
+    delete props.innerProps.onMouseMove;
+    delete props.innerProps.onMouseOver;
+    const {data, innerProps, isFocused, ...otherProps} = props;
+    const newProps = {innerProps: {...innerProps}, ...otherProps};
+    return (
+      <components.Option {...newProps} className="select-option">
+        {props.children}{data.icon && <i className={`${data.baseClass} fa-${data.icon}`} />}
+      </components.Option>
+    );
+  }
+
   render() {
     this.drawCanvasContent();
 
@@ -178,13 +210,12 @@ class App extends Component {
             <form name="adjust-form" onSubmit={this.downloadIcon}>
               <label>
                 Icon:
-                {/* <Dropdown
-                  placeholder='Select Icon'
-                  fluid
-                  search
-                  selection
-                  options={icons}
-                /> */}
+                <Select
+                  filterOption={createFilter({ ignoreAccents: false })} // this makes all the difference!
+                  onChange={this.handleIconChange}
+                  options={this.state.icons}
+                  components={ {Option: this.customSingleValue } }
+                />
               </label>
               <label>
                 Size:
@@ -202,6 +233,7 @@ class App extends Component {
                 }
               </label>
               <input type="submit" value="Download!" />
+              <i className="fas fa-star"></i>
             </form>
           </div>
           <div id="preview-wrap" className="col">
