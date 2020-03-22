@@ -309,12 +309,14 @@ class App extends Component {
                       </Input>
                   </Form.Field>
                   <Form.Field>
-                    <label>
                       <Checkbox checked={transparentBg} className="transparent-bg-input" onChange={this.handleTransparentBgToggle} label="Transparent Background" />
                       {!transparentBg &&
-                        <Input label="Background Color:" type="color" className="color-input" value={bgColor} onChange={this.handleBackgroundColorChange} />
+                        <Input label="Background Color:" type="text" className="color-input" value={bgColor} onChange={this.handleBackgroundColorChange}>
+                          <Label>Background Color:</Label>
+                          <input type="text" value={this.state.bgColor} />
+                          <input type="color" value={this.state.bgColor} />
+                        </Input>
                       }
-                    </label>
                   </Form.Field>
                   <Form.Field inline>
                     <Container
