@@ -4,6 +4,7 @@ import Select, { createFilter, components } from 'react-select';
 import { Header, Grid, Segment, Container, Form, Button, Checkbox, Input } from 'semantic-ui-react';
 
 var opentype = require('opentype.js');
+const worlds = ["🌍", "🌏", "🌎"];
 
 class App extends Component {
 
@@ -22,9 +23,11 @@ class App extends Component {
       bgColor: "#ffffff",
       unicode: "F2B4",
       icons: [],
-      fontsLoaded: false
+      fontsLoaded: false,
+      worldIndex: 0
     };
 
+    this.spinTheGlobe = this.spinTheGlobe.bind(this);
     this.loadFonts = this.loadFonts.bind(this);
     this.drawCanvasContent = this.drawCanvasContent.bind(this);
     this.downloadIcon = this.downloadIcon.bind(this);
@@ -49,6 +52,18 @@ class App extends Component {
     });
 
     this.loadFonts();
+
+    this.spinTheGlobeTimer = setInterval(() => this.spinTheGlobe(), 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.spinTheGlobeTimer);
+  }
+
+  spinTheGlobe() {
+    this.setState((prevState) => ({
+      worldIndex: prevState.worldIndex === 2 ? 0 : prevState.worldIndex + 1
+    }));
   }
 
   async loadFonts() {
@@ -146,11 +161,11 @@ class App extends Component {
 
       const font = `900 ${canvasWidth}px "${this.state.fontFamily}"`;
       ctx.font = font;
-      const textString = String.fromCharCode(parseInt(this.state.unicode, 16)),//this.faUnicode(this.state.icon),//'\uF063',
+      const textString = String.fromCharCode(parseInt(this.state.unicode, 16)),
         textWidth = ctx.measureText(textString).width;
 
-        // TODO draw margin, be sure to fit to size, https://stackoverflow.com/questions/20551534/size-to-fit-font-on-a-canvas
-        // https://jsfiddle.net/tomers13/km43p5bv/
+      // TODO draw margin, be sure to fit to size, https://stackoverflow.com/questions/20551534/size-to-fit-font-on-a-canvas
+      // https://jsfiddle.net/tomers13/km43p5bv/
       ctx.fillStyle = this.state.color;
       ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvasHeight - (canvasHeight / 8));
       // canvas.width = canvasWidth * window.devicePixelRatio;
@@ -246,10 +261,16 @@ class App extends Component {
 
     return (
       <div>
-        <Header className="App-header">
-          CleanIcons.app
-        </Header>
+        
         <Container className="App">
+          <Header
+            id="app-header"
+            as="h1"
+            textAlign="left"
+            dividing
+          >
+            CleanIc<i className="fas fa-adjust" />ns.app
+          </Header>
           <Grid columns={2} stackable>
             <Grid.Column>
               <Segment
@@ -274,7 +295,7 @@ class App extends Component {
                       <Input type="range" min="32" max="1024" step="1" value={size} onChange={this.handleSizeChange} />
                     </label>
                   </Form.Field>
-                  <Form.Field>
+                  <Form.Field hidden>
                     <label>
                       Margin: <span id="icon-margin">{margin}px</span>
                       <Input type="range" min="0" max="50" step="1" value={margin} onChange={this.handleMarginChange} />
@@ -306,6 +327,11 @@ class App extends Component {
             </Grid.Column>
           </Grid>
         </Container>
+        <footer className="w3-container w3-center">
+          <p className="w3-text-light-green">
+                    Made by <a href="http://tomer.shvueli.com?ref=cleanicons" target="_blank" rel="noopener noreferrer">Tomer</a> from all around the <a href="http://wherethehellaretomerandmichelle.com?ref=cleanicons" target="_blank" rel="noopener noreferrer"><span role="img" aria-label="World">{worlds[this.state.worldIndex]}</span></a> | <span className="about-link" onClick={this.openModal}>About</span>
+          </p>
+        </footer>
       </div>
     );
   }
