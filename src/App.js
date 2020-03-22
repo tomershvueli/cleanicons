@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Select, { createFilter, components } from 'react-select';
+import { Header, Grid, Segment, Container, Form, Button, Checkbox, Input } from 'semantic-ui-react';
 
 var opentype = require('opentype.js');
 
@@ -12,14 +13,15 @@ class App extends Component {
     this.canvas = React.createRef();
 
     this.state = {
-      icon: "glass-martini", // TODO random
+      icon: "font-awesome", // TODO random
       color: "#ff004f",
       size: "100px",
       transparentBg: true,
-      fontFamily: "Font Awesome 5 Free",
+      fontFamily: "Font Awesome 5 Brands",
       bgColor: "",
-      unicode: "",
-      icons: []
+      unicode: "F2B4",
+      icons: [],
+      fontsLoaded: false
     };
 
     this.loadFonts = this.loadFonts.bind(this);
@@ -37,6 +39,10 @@ class App extends Component {
     const fontAwesomeBrand = '900 48px "Font Awesome 5 Brands"';
 
     document.fonts.load(fontAwesomeRegular, fontAwesomeBrand).then((_) => {
+      this.setState({
+        fontsLoaded: true
+      });
+
       this.drawCanvasContent();
     });
 
@@ -153,7 +159,7 @@ class App extends Component {
   }
 
   handleIconChange(e) {
-    const unicode = this.formatUnicode(e.unicode)
+    const unicode = this.formatUnicode(e.unicode);
     this.setState({
       icon: e.value,
       fontFamily: e.fontFamily,
@@ -201,45 +207,62 @@ class App extends Component {
     this.drawCanvasContent();
 
     return (
-      <div className="App">
-        <header className="App-header">
+      <div>
+        <Header className="App-header">
           CleanIcons.app
-        </header>
-        <div id="main-wrap">
-          <div id="adjust-wrap" className="col">
-            <form name="adjust-form" onSubmit={this.downloadIcon}>
-              <label>
-                Icon:
-                <Select
-                  filterOption={createFilter({ ignoreAccents: false })} // this makes all the difference!
-                  onChange={this.handleIconChange}
-                  options={this.state.icons}
-                  components={ {Option: this.customSingleValue } }
-                />
-              </label>
-              <label>
-                Size:
-                <input type="range" min="1" max="512" step="1" value={this.state.size} onChange={this.handleSizeChange} />
-              </label>
-              <label>
-                Color:
-                <input type="color" value={this.state.color} onChange={this.handleColorChange} />
-              </label>
-              <label>
-                Background Color:
-                <input type="checkbox" checked={this.state.transparentBg} onChange={this.handleTransparentBgToggle} />
-                {!this.state.transparentBg &&
-                  <input type="color" value={this.state.bgColor} onChange={this.handleBackgroundColorChange} />
-                }
-              </label>
-              <input type="submit" value="Download!" />
-              <i className="fas fa-star"></i>
-            </form>
-          </div>
-          <div id="preview-wrap" className="col">
-            <canvas id="canvas" width="1024" height="1024" ref={this.canvas}></canvas>
-          </div>
-        </div>
+        </Header>
+        <Container className="App">
+          <Grid columns={2} stackable>
+            <Grid.Column>
+              <Segment
+                textAlign="left"
+              >
+                <Form name="adjust-form" onSubmit={this.downloadIcon} size="large" loading={!this.state.fontsLoaded}>
+                  <Form.Field>
+                    <label>
+                      Icon:
+                      <Select
+                        filterOption={createFilter({ ignoreAccents: false })} // this makes all the difference!
+                        onChange={this.handleIconChange}
+                        options={this.state.icons}
+                        defaultInputValue={this.state.icon}
+                        components={ {Option: this.customSingleValue } }
+                      />
+                    </label>
+                  </Form.Field>
+                  <Form.Field inline>
+                    <label>
+                      Size:
+                      <Input type="range" min="1" max="512" step="1" value={this.state.size} onChange={this.handleSizeChange} />
+                    </label>
+                  </Form.Field>
+                  <Form.Field>
+                      <Input label="Color:" type="color" value={this.state.color} onChange={this.handleColorChange} />
+                  </Form.Field>
+                  <Form.Field>
+                    <label>
+                      Background Color:
+                      <Checkbox checked={this.state.transparentBg} onChange={this.handleTransparentBgToggle} label="Transparent" />
+                      {!this.state.transparentBg &&
+                        <Input inline type="color" value={this.state.bgColor} onChange={this.handleBackgroundColorChange} />
+                      }
+                    </label>
+                  </Form.Field>
+                  <Form.Field inline>
+                    <Container
+                      textAlign="center"
+                    >
+                      <Button type="submit" size="big" color="teal">Download! <i className="fas fa-arrow-down" /></Button>
+                    </Container>
+                  </Form.Field>
+                </Form>
+              </Segment>
+            </Grid.Column>
+            <Grid.Column>
+              <canvas id="canvas" width="1024" height="1024" ref={this.canvas}></canvas>
+            </Grid.Column>
+          </Grid>
+        </Container>
       </div>
     );
   }
