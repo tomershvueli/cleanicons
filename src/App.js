@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import './App.css';
 import Select, { createFilter, components } from 'react-select';
-import { Header, Grid, Segment, Container, Form, Button, Checkbox, Input } from 'semantic-ui-react';
+import { Header, Grid, Segment, Container, Form, Button, Checkbox, Input, Label } from 'semantic-ui-react';
+
+import Footer from './Footer';
 
 var opentype = require('opentype.js');
-const worlds = ["🌍", "🌏", "🌎"];
 
 class App extends Component {
 
@@ -260,9 +261,8 @@ class App extends Component {
     const { fontsLoaded, icons, icon, size, margin, color, transparentBg, bgColor } = this.state;
 
     return (
-      <div>
-        
-        <Container className="App">
+      <div className="App">
+        <Container>
           <Header
             id="app-header"
             as="h1"
@@ -302,7 +302,11 @@ class App extends Component {
                     </label>
                   </Form.Field>
                   <Form.Field>
-                      <Input label="Color:" type="color" className="color-input" value={color} onChange={this.handleColorChange} />
+                      <Input label="Color:" type="text" className="color-input" value={color} onChange={this.handleColorChange}>
+                        <Label>Color:</Label>
+                        <input type="text" value={this.state.color} />
+                        <input type="color" value={this.state.color} />
+                      </Input>
                   </Form.Field>
                   <Form.Field>
                     <label>
@@ -325,13 +329,12 @@ class App extends Component {
             <Grid.Column>
               <canvas id="canvas" width="1024" height="1024" ref={this.canvas}></canvas>
             </Grid.Column>
+            <Segment>
+            All 3rd party brands, trademarks, trade-, product- and corporate-names, logos and other properties belong to their respective owners. By using our services, you agree not to violate any licenses and copyright laws.
+            </Segment>
           </Grid>
         </Container>
-        <footer className="w3-container w3-center">
-          <p className="w3-text-light-green">
-                    Made by <a href="http://tomer.shvueli.com?ref=cleanicons" target="_blank" rel="noopener noreferrer">Tomer</a> from all around the <a href="http://wherethehellaretomerandmichelle.com?ref=cleanicons" target="_blank" rel="noopener noreferrer"><span role="img" aria-label="World">{worlds[this.state.worldIndex]}</span></a> | <span className="about-link" onClick={this.openModal}>About</span>
-          </p>
-        </footer>
+        <Footer />
       </div>
     );
   }

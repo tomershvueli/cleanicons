@@ -1,5 +1,19 @@
 .App {
   text-align: center;
+  height: 100%;
+  position: relative;
+}
+
+.container {
+  min-height: 100%;
+  /* equal to footer height */
+  margin-bottom: -60px; 
+}
+
+.container:after {
+  content: "";
+  display: block;
+  height: 60px;
 }
 
 .App-logo {
@@ -14,7 +28,8 @@
 }
 
 #app-header {
-  margin: 25px 0;
+  padding-top: 25px;
+  margin-bottom: 25px;
 }
 
 .App-link {
