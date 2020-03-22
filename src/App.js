@@ -15,7 +15,8 @@ class App extends Component {
     this.state = {
       icon: "font-awesome", // TODO random
       color: "#ff004f",
-      size: "100",
+      size: 512,
+      margin: 0,
       transparentBg: true,
       fontFamily: "Font Awesome 5 Brands",
       bgColor: "#ffffff",
@@ -29,6 +30,7 @@ class App extends Component {
     this.downloadIcon = this.downloadIcon.bind(this);
     this.handleIconChange = this.handleIconChange.bind(this);
     this.handleSizeChange = this.handleSizeChange.bind(this);
+    this.handleMarginChange = this.handleMarginChange.bind(this);
     this.handleColorChange = this.handleColorChange.bind(this);
     this.handleBackgroundColorChange = this.handleBackgroundColorChange.bind(this);
     this.handleTransparentBgToggle = this.handleTransparentBgToggle.bind(this);
@@ -103,29 +105,31 @@ class App extends Component {
     }
   }
 
-  drawCanvasContent() {
-    if (this.canvas.current) {
-      console.log("drawing")
-      const canvas = this.canvas.current;
-      const ctx = canvas.getContext("2d");
-      const canvasWidth = 1024;
-      const canvasHeight = 1024;
+  drawCanvasContent(isDownloadCanvas = false) {
+    let curCanvas;
+    if (!isDownloadCanvas && this.canvas.current) {
+      curCanvas = this.canvas.current;
+    } else if (isDownloadCanvas) {
+      curCanvas = document.createElement('canvas');
+    }
 
-      const font = `900 ${canvasWidth}px "${this.state.fontFamily}"`;
-      const textString = String.fromCharCode(parseInt(this.state.unicode, 16)),//this.faUnicode(this.state.icon),//'\uF063',
-        textWidth = ctx.measureText(textString).width;
+    if (curCanvas) {
+      console.log("drawing")
+      const ctx = curCanvas.getContext("2d");
+      const canvasWidth = (isDownloadCanvas) ? this.state.size : 1024;
+      const canvasHeight = (isDownloadCanvas) ? this.state.size : 1024;
+      curCanvas.width = canvasWidth;
+      curCanvas.height = canvasHeight;
 
       // Clear canvas first
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-      ctx.font = font;
 
       // Background
       if (!this.state.transparentBg) {
         ctx.fillStyle = this.state.bgColor;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-      } else {
-        // Create transparent 'checkered' background
+      } else if (!isDownloadCanvas) {
+        // Create transparent 'checkered' background, only if it's the display canvas
         const patternCanvas = document.createElement('canvas');
         const patternContext = patternCanvas.getContext('2d');
         patternCanvas.width = 40;
@@ -133,32 +137,45 @@ class App extends Component {
         patternContext.fillStyle = "#d5d5d5";
         patternContext.fillRect(0,0,20,20);
         patternContext.fillRect(20,20,20,20);
-        var pattern = ctx.createPattern(patternCanvas, "repeat");
+        const pattern = ctx.createPattern(patternCanvas, "repeat");
         ctx.fillStyle = pattern;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       }
 
       const dpr = window.devicePixelRatio;
 
+      const font = `900 ${canvasWidth}px "${this.state.fontFamily}"`;
+      ctx.font = font;
+      const textString = String.fromCharCode(parseInt(this.state.unicode, 16)),//this.faUnicode(this.state.icon),//'\uF063',
+        textWidth = ctx.measureText(textString).width;
+
+        // TODO draw margin, be sure to fit to size, https://stackoverflow.com/questions/20551534/size-to-fit-font-on-a-canvas
+        // https://jsfiddle.net/tomers13/km43p5bv/
       ctx.fillStyle = this.state.color;
       ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvasHeight - (canvasHeight / 8));
       // canvas.width = canvasWidth * window.devicePixelRatio;
       // canvas.height = canvasHeight * window.devicePixelRatio;
       ctx.scale = dpr;
-      canvas.style.width = `${canvasWidth / dpr}px`;
-      canvas.style.height = `${canvasHeight / dpr}px`;
+      curCanvas.style.width = `${canvasWidth / dpr}px`;
+      curCanvas.style.height = `${canvasHeight / dpr}px`;
+
+      // The returned canvas object will only be used by the downloadIcon method, otherwise ignored
+      return curCanvas;
     }
   }
 
   downloadIcon(e) {
     e.preventDefault();
 
-    const canvas = this.canvas.current;
+    const canvas = this.drawCanvasContent(true);
+    const { icon, size, color } = this.state;
+    const cleanColor = color.replace('#', '');
+    const downloadFileName = `CleanIcons.app_${icon}_${size}px_${cleanColor}.png`;
 
     canvas.toBlob(function(blob) {
       // blob ready, download it
       let link = document.createElement('a');
-      link.download = 'example.png';
+      link.download = downloadFileName;
   
       link.href = URL.createObjectURL(blob);
       link.click((e) => {
@@ -182,6 +199,12 @@ class App extends Component {
   handleSizeChange(e) {
     this.setState({
       size: e.target.value
+    });
+  }
+
+  handleMarginChange(e) {
+    this.setState({
+      margin: e.target.value
     });
   }
 
@@ -219,6 +242,8 @@ class App extends Component {
   render() {
     this.drawCanvasContent();
 
+    const { fontsLoaded, icons, icon, size, margin, color, transparentBg, bgColor } = this.state;
+
     return (
       <div>
         <Header className="App-header">
@@ -230,33 +255,39 @@ class App extends Component {
               <Segment
                 textAlign="left"
               >
-                <Form name="adjust-form" onSubmit={this.downloadIcon} size="large" loading={!this.state.fontsLoaded}>
+                <Form name="adjust-form" onSubmit={this.downloadIcon} size="large" loading={!fontsLoaded}>
                   <Form.Field>
                     <label>
                       Icon:
                       <Select
                         filterOption={createFilter({ ignoreAccents: false })}
                         onChange={this.handleIconChange}
-                        options={this.state.icons}
-                        defaultInputValue={this.state.icon}
+                        options={icons}
+                        defaultInputValue={icon}
                         components={ {Option: this.customOptionComponent } }
                       />
                     </label>
                   </Form.Field>
                   <Form.Field>
                     <label>
-                      Size: <span id="icon-size">{this.state.size}px</span>
-                      <Input type="range" min="32" max="1024" step="1" value={this.state.size} onChange={this.handleSizeChange} />
+                      Size: <span id="icon-size">{size}px</span>
+                      <Input type="range" min="32" max="1024" step="1" value={size} onChange={this.handleSizeChange} />
                     </label>
                   </Form.Field>
                   <Form.Field>
-                      <Input label="Color:" type="color" className="color-input" value={this.state.color} onChange={this.handleColorChange} />
+                    <label>
+                      Margin: <span id="icon-margin">{margin}px</span>
+                      <Input type="range" min="0" max="50" step="1" value={margin} onChange={this.handleMarginChange} />
+                    </label>
+                  </Form.Field>
+                  <Form.Field>
+                      <Input label="Color:" type="color" className="color-input" value={color} onChange={this.handleColorChange} />
                   </Form.Field>
                   <Form.Field>
                     <label>
-                      <Checkbox checked={this.state.transparentBg} className="transparent-bg-input" onChange={this.handleTransparentBgToggle} label="Transparent Background" />
-                      {!this.state.transparentBg &&
-                        <Input label="Background Color:" type="color" className="color-input" value={this.state.bgColor} onChange={this.handleBackgroundColorChange} />
+                      <Checkbox checked={transparentBg} className="transparent-bg-input" onChange={this.handleTransparentBgToggle} label="Transparent Background" />
+                      {!transparentBg &&
+                        <Input label="Background Color:" type="color" className="color-input" value={bgColor} onChange={this.handleBackgroundColorChange} />
                       }
                     </label>
                   </Form.Field>
