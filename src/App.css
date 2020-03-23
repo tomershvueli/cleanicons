@@ -1,7 +1,5 @@
 .App {
-  text-align: center;
   height: 100%;
-  position: relative;
 }
 
 .container {
@@ -16,45 +14,7 @@
   height: 60px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 #app-header {
   padding-top: 25px;
   margin-bottom: 25px;
 }
-
-.App-link {
-  color: #61dafb;
-}
-
-.color-input input {
-  height: auto;
-}
-
-.transparent-bg-input {
-  margin-bottom: 8px;
-}
-
-.select-option:hover {
-  background-color: #61dafb;
-}
-
-.select-option .icon-wrap {
-  float: right;
-}
-
-.transparent-bg-input label {
-  font-weight: 700;
-}
-
-body{ background-color: ivory; }
-#canvas{border:1px solid rgb(65, 65, 65); margin:0 auto;}

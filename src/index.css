@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: ivory;
 }
 
 code {
@@ -14,4 +15,8 @@ code {
 
 #root {
   height: 100%;
+}
+
+.center {
+  text-align: center;
 }

@@ -1,0 +1,24 @@
+
+.color-input input {
+  height: auto;
+}
+
+.transparent-bg-input {
+  margin-bottom: 8px;
+}
+
+.select-option:hover {
+  background-color: #61dafb;
+}
+
+.select-option .icon-wrap {
+  float: right;
+}
+
+.transparent-bg-input label {
+  font-weight: 700;
+}
+
+#canvas {
+  border:1px solid rgb(65, 65, 65); margin:0 auto;
+}

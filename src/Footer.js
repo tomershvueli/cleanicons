@@ -15,7 +15,7 @@ class Footer extends Component {
   }
 
   componentDidMount() {
-    this.spinTheGlobeTimer = setInterval(() => this.spinTheGlobe(), 1000);
+    this.spinTheGlobeTimer = setInterval(this.spinTheGlobe, 1000);
   }
 
   componentWillUnmount() {
@@ -24,7 +24,7 @@ class Footer extends Component {
 
   spinTheGlobe() {
     this.setState((prevState) => ({
-      worldIndex: prevState.worldIndex === 2 ? 0 : prevState.worldIndex + 1
+      worldIndex: prevState.worldIndex === (worlds.length - 1) ? 0 : prevState.worldIndex + 1
     }));
   }
 
