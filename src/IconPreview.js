@@ -276,8 +276,8 @@ class IconPreview extends Component {
               <Form.Field>
                   <Input label="Color:" type="text" className="color-input" value={color} onChange={this.handleColorChange}>
                     <Label>Color:</Label>
-                    <input type="text" value={this.state.color} />
-                    <input type="color" value={this.state.color} />
+                    <input type="text" value={color} />
+                    <input type="color" value={color} />
                   </Input>
               </Form.Field>
               <Form.Field>
@@ -285,8 +285,8 @@ class IconPreview extends Component {
                   {!transparentBg &&
                     <Input label="Background Color:" type="text" className="color-input" value={bgColor} onChange={this.handleBackgroundColorChange}>
                       <Label>Background Color:</Label>
-                      <input type="text" value={this.state.bgColor} />
-                      <input type="color" value={this.state.bgColor} />
+                      <input type="text" value={bgColor} />
+                      <input type="color" value={bgColor} />
                     </Input>
                   }
               </Form.Field>
