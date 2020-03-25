@@ -13,14 +13,16 @@ class IconPreview extends Component {
     this.canvas = React.createRef();
 
     this.state = {
-      icon: "font-awesome",
+      icon: {
+        label: "font-awesome",
+        unicode: "F2B4",
+        fontFamily: "Font Awesome 5 Brands",
+      },
       color: "#ff004f",
       size: 512,
       margin: 0,
       transparentBg: true,
-      fontFamily: "Font Awesome 5 Brands",
       bgColor: "#ffffff",
-      unicode: "F2B4",
       icons: [],
       fontsLoaded: false
     };
@@ -66,12 +68,12 @@ class IconPreview extends Component {
           if (element.unicode) {
             // We're looking at a 'real' icon
             const icon = {
+              ...element,
               key: element.id,
               value: element.name,
               label: element.name,
               fontFamily,
               unicode: element.unicode,
-              icon: element.name,
               baseClass
             }
             tempIcons.push(icon);
@@ -113,20 +115,25 @@ class IconPreview extends Component {
       curCanvas = document.createElement('canvas');
     }
 
+    const { icon, size, color, transparentBg, bgColor } = this.state;
+    const boundingBoxX = icon.xMax - icon.xMin;
+    const boundingBoxY = icon.yMax - icon.yMin;
+    const tallerThanWide = boundingBoxY > boundingBoxX;
+
     if (curCanvas) {
       console.log("drawing")
       const ctx = curCanvas.getContext("2d");
-      const canvasWidth = (isDownloadCanvas) ? this.state.size : 1024;
-      const canvasHeight = (isDownloadCanvas) ? this.state.size : 1024;
-      curCanvas.width = canvasWidth;
-      curCanvas.height = canvasHeight;
+      const canvasWidth = (isDownloadCanvas) ? size : 1024;
+      const canvasHeight = (isDownloadCanvas) ? size : 1024;
+      curCanvas.width = curCanvas.height = canvasWidth;
+      let curFontSize = canvasWidth;
 
       // Clear canvas first
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       // Background
-      if (!this.state.transparentBg) {
-        ctx.fillStyle = this.state.bgColor;
+      if (!transparentBg) {
+        ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       } else if (!isDownloadCanvas) {
         // Create transparent 'checkered' background, only if it's the display canvas
@@ -144,15 +151,59 @@ class IconPreview extends Component {
 
       const dpr = window.devicePixelRatio;
 
-      const font = `900 ${canvasWidth}px "${this.state.fontFamily}"`;
-      ctx.font = font;
-      const textString = String.fromCharCode(parseInt(this.state.unicode, 16)),
-        textWidth = ctx.measureText(textString).width;
+      const textString = String.fromCharCode(parseInt(icon.unicode, 16));
+
+      let sizedToFit, textWidth, canvasHeightOffset = 0, step = 5;
+
+      do {
+        const font = `900 ${curFontSize}px "${icon.fontFamily}"`;
+        ctx.font = font;
+        const measure = ctx.measureText(textString);
+        textWidth = measure.width;
+        if (measure.actualBoundingBoxRight) {
+          // We're on a browser that supports bounding box
+          if (tallerThanWide) {
+            // Check that our y bounding box matches our height
+            const yBoundingBox = Math.floor(measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
+            const diff = yBoundingBox - canvasHeight;
+            if (Math.abs(diff) < 10) {
+              step = .5;
+            }
+            if (diff < 0) {
+              curFontSize += step;
+            } else if (diff > 0) {
+              curFontSize -= step;
+            } else {
+              // canvasHeightOffset = yBoundingBox / 2;
+              sizedToFit = true;
+            }
+          } else {
+            // Check that our x bounding box matches our width
+            const xBoundingBox = Math.floor(measure.actualBoundingBoxRight + measure.actualBoundingBoxLeft);
+            const diff = xBoundingBox - canvasWidth;
+            if (Math.abs(diff) < 10) {
+              step = .5;
+            }
+            if (diff < 0) {
+              curFontSize += step;
+            } else if (diff > 0) {
+              curFontSize -= step;
+            } else {
+              canvasHeightOffset = icon.yMin / 2;
+              sizedToFit = true;
+            }
+          }
+        } else {
+          // We don't support bounding box, this is as good as we're gonna get
+          sizedToFit = true;
+        }
+      } while (!sizedToFit);
 
       // TODO draw margin, be sure to fit to size, https://stackoverflow.com/questions/20551534/size-to-fit-font-on-a-canvas
       // https://jsfiddle.net/tomers13/km43p5bv/
-      ctx.fillStyle = this.state.color;
-      ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvasHeight - (canvasHeight / 8));
+      ctx.fillStyle = color;
+      const yPos = canvasHeight - (canvasHeight / 8) - canvasHeightOffset;
+      ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), yPos);
 
       ctx.scale = dpr;
       curCanvas.style.width = `${canvasWidth / dpr}px`;
@@ -185,12 +236,13 @@ class IconPreview extends Component {
     }, 'image/png');
   }
 
-  handleIconChange(e) {
-    const unicode = this.formatUnicode(e.unicode);
+  handleIconChange(icon) {
+    const unicode = this.formatUnicode(icon.unicode);
     this.setState({
-      icon: e.value,
-      fontFamily: e.fontFamily,
-      unicode
+      icon: {
+        ...icon,
+        unicode
+      }
     });
   }
 
@@ -232,7 +284,7 @@ class IconPreview extends Component {
     return (
       <components.Option {...newProps} className="select-option">
         {props.children}
-        <span className="icon-wrap">{data.icon && <i className={`${data.baseClass} fa-${data.icon}`} />}</span>
+        <span className="icon-wrap">{data.label && <i className={`${data.baseClass} fa-${data.label}`} />}</span>
       </components.Option>
     );
   }
@@ -256,7 +308,7 @@ class IconPreview extends Component {
                     filterOption={createFilter({ ignoreAccents: false })}
                     onChange={this.handleIconChange}
                     options={icons}
-                    defaultInputValue={icon}
+                    defaultInputValue={icon.label}
                     components={ {Option: this.customOptionComponent } }
                   />
                 </label>
