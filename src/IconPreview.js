@@ -15,11 +15,7 @@ class IconPreview extends Component {
     this.canvas = React.createRef();
 
     this.state = {
-      icon: {
-        label: "font-awesome",
-        unicode: "F2B4",
-        fontFamily: "Font Awesome 5 Brands",
-      },
+      icon: { },
       color: "#ff004f",
       size: 512,
       margin: 0,
@@ -41,21 +37,17 @@ class IconPreview extends Component {
     const fontAwesomeRegular = '900 48px "Font Awesome 5 Free"';
     const fontAwesomeBrand = '900 48px "Font Awesome 5 Brands"';
 
-    document.fonts.load(fontAwesomeRegular, fontAwesomeBrand).then((_) => {
-      this.setState({
-        fontsLoaded: true
-      });
-
-      this.drawCanvasContent();
+    // Load up both fonts before we start to render the canvas
+    const loadFonts = Promise.all([document.fonts.load(fontAwesomeRegular), document.fonts.load(fontAwesomeBrand)]);
+    loadFonts.then((_) => {
+      this.loadFonts();
     });
-
-    this.loadFonts();
   }
 
   async loadFonts() {
     const fonts = [await this.loadFont('fonts/fa-solid-900.ttf'), await this.loadFont('fonts/fa-brands-400.ttf')];
 
-    let tempIcons = [];
+    let tempIcons = [], defaultIcon;
 
     for (let font of fonts) {
       const fontFamily = font.names.preferredFamily.en;
@@ -68,14 +60,18 @@ class IconPreview extends Component {
             // We're looking at a 'real' icon
             const icon = {
               ...element,
-              key: element.id,
+              key: element.index,
               value: element.name,
               label: element.name,
               fontFamily,
-              unicode: element.unicode,
               baseClass
             }
             tempIcons.push(icon);
+
+            // Set our default 'font-awesome' glyph
+            if (element.name === "font-awesome") {
+              defaultIcon = icon;
+            }
           } 
         }
       }
@@ -84,8 +80,12 @@ class IconPreview extends Component {
     tempIcons.sort((a, b) => a.value > b.value);
 
     this.setState({
-      icons: tempIcons
+      icons: tempIcons,
+      fontsLoaded: true,
+      icon: defaultIcon
     });
+
+    this.drawCanvasContent();
   }
 
   // Fix for opentype async/await, https://github.com/opentypejs/opentype.js/issues/406
@@ -150,7 +150,7 @@ class IconPreview extends Component {
 
       const dpr = window.devicePixelRatio;
 
-      const textString = String.fromCharCode(parseInt(icon.unicode, 16));
+      const textString = String.fromCharCode(parseInt(this.formatUnicode(icon.unicode), 16));
 
       let sizedToFit, textWidth, canvasHeightOffset = 0, step = 5;
 
@@ -174,6 +174,7 @@ class IconPreview extends Component {
               curFontSize -= step;
             } else {
               // canvasHeightOffset = yBoundingBox / 2;
+              console.log(measure)
               sizedToFit = true;
             }
           } else {
@@ -189,6 +190,7 @@ class IconPreview extends Component {
               curFontSize -= step;
             } else {
               canvasHeightOffset = icon.yMin / 2;
+              console.log(measure)
               sizedToFit = true;
             }
           }
@@ -202,6 +204,7 @@ class IconPreview extends Component {
       // https://jsfiddle.net/tomers13/km43p5bv/
       ctx.fillStyle = color;
       const yPos = canvasHeight - (canvasHeight / 8) - canvasHeightOffset;
+      console.log(`bounding box: ${boundingBoxY}, cur draw pos: ${yPos}, prev draw pos: ${canvasHeight - (canvasHeight / 8)}, offset: ${canvasHeightOffset}`);
       ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), yPos);
 
       ctx.scale = dpr;
@@ -236,12 +239,8 @@ class IconPreview extends Component {
   }
 
   handleIconChange(icon) {
-    const unicode = this.formatUnicode(icon.unicode);
     this.setState({
-      icon: {
-        ...icon,
-        unicode
-      }
+      icon
     });
   }
 
@@ -288,6 +287,7 @@ class IconPreview extends Component {
                 <label>
                   Icon:
                   <Select
+                    loading={this.state.fontsLoaded}
                     filterOption={createFilter({ ignoreAccents: false })}
                     onChange={this.handleIconChange}
                     options={icons}
@@ -332,7 +332,7 @@ class IconPreview extends Component {
           </Segment>
         </Grid.Column>
         <Grid.Column>
-          <canvas id="canvas" width={CANVAS_SIZE} height={CANVAS_SIZE} ref={this.canvas}></canvas>
+          <canvas id="canvas" width={0} height={0} ref={this.canvas}></canvas>
         </Grid.Column>
         <Segment>
         All 3rd party brands, trademarks, trade-, product- and corporate-names, logos and other properties belong to their respective owners. By using our services, you agree not to violate any licenses and copyright laws.
