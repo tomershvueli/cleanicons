@@ -5,6 +5,8 @@ import { Grid, Segment, Form, Button, Checkbox, Input, Label } from 'semantic-ui
 
 const opentype = require('opentype.js');
 
+const CANVAS_SIZE = 1024;
+
 class IconPreview extends Component {
 
   constructor(props) {
@@ -31,10 +33,7 @@ class IconPreview extends Component {
     this.drawCanvasContent = this.drawCanvasContent.bind(this);
     this.downloadIcon = this.downloadIcon.bind(this);
     this.handleIconChange = this.handleIconChange.bind(this);
-    this.handleSizeChange = this.handleSizeChange.bind(this);
-    this.handleMarginChange = this.handleMarginChange.bind(this);
-    this.handleColorChange = this.handleColorChange.bind(this);
-    this.handleBackgroundColorChange = this.handleBackgroundColorChange.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
     this.handleTransparentBgToggle = this.handleTransparentBgToggle.bind(this);
   }
 
@@ -123,8 +122,8 @@ class IconPreview extends Component {
     if (curCanvas) {
       console.log("drawing")
       const ctx = curCanvas.getContext("2d");
-      const canvasWidth = (isDownloadCanvas) ? size : 1024;
-      const canvasHeight = (isDownloadCanvas) ? size : 1024;
+      const canvasWidth = (isDownloadCanvas) ? size : CANVAS_SIZE;
+      const canvasHeight = canvasWidth;
       curCanvas.width = curCanvas.height = canvasWidth;
       let curFontSize = canvasWidth;
 
@@ -220,7 +219,7 @@ class IconPreview extends Component {
     const canvas = this.drawCanvasContent(true);
     const { icon, size, color } = this.state;
     const cleanColor = color.replace('#', '');
-    const downloadFileName = `CleanIcons_${icon}_${size}px_${cleanColor}.png`;
+    const downloadFileName = `CleanIcons_${icon.label}_${size}px_${cleanColor}.png`;
 
     canvas.toBlob(function(blob) {
       let link = document.createElement('a');
@@ -246,34 +245,18 @@ class IconPreview extends Component {
     });
   }
 
-  handleSizeChange(e) {
+  handleInputChange(e) {
+    const target = e.target;
+    const { value, name } = target;
     this.setState({
-      size: e.target.value
-    });
-  }
-
-  handleMarginChange(e) {
-    this.setState({
-      margin: e.target.value
-    });
-  }
-
-  handleColorChange(e) {
-    this.setState({
-      color: e.target.value
-    });
-  }
-
-  handleBackgroundColorChange(e) {
-    this.setState({
-      bgColor: e.target.value
+      [name]: value
     });
   }
 
   handleTransparentBgToggle() {
-    this.setState({
-      transparentBg: !this.state.transparentBg
-    });
+    this.setState(prevState => ({
+      transparentBg: !prevState.transparentBg
+    }));
   }
 
   customOptionComponent(props) {
@@ -316,17 +299,17 @@ class IconPreview extends Component {
               <Form.Field>
                 <label>
                   Size: <span id="icon-size">{size}px</span>
-                  <Input type="range" min="32" max="1024" step="1" value={size} onChange={this.handleSizeChange} />
+                  <Input type="range" min="32" max={CANVAS_SIZE} step="1" value={size} name="size" onChange={this.handleInputChange} />
                 </label>
               </Form.Field>
               <Form.Field hidden>
                 <label>
                   Margin: <span id="icon-margin">{margin}px</span>
-                  <Input type="range" min="0" max="50" step="1" value={margin} onChange={this.handleMarginChange} />
+                  <Input type="range" min="0" max="50" step="1" value={margin} name="margin" onChange={this.handleInputChange} />
                 </label>
               </Form.Field>
               <Form.Field>
-                  <Input label="Color:" type="text" className="color-input" value={color} onChange={this.handleColorChange}>
+                  <Input label="Color:" type="text" className="color-input" value={color} name="color" onChange={this.handleInputChange}>
                     <Label>Color:</Label>
                     <input type="text" value={color} />
                     <input type="color" value={color} />
@@ -335,7 +318,7 @@ class IconPreview extends Component {
               <Form.Field>
                   <Checkbox checked={transparentBg} className="transparent-bg-input" onChange={this.handleTransparentBgToggle} label="Transparent Background" />
                   {!transparentBg &&
-                    <Input label="Background Color:" type="text" className="color-input" value={bgColor} onChange={this.handleBackgroundColorChange}>
+                    <Input label="Background Color:" type="text" className="color-input" value={bgColor} name="bgColor" onChange={this.handleInputChange}>
                       <Label>Background Color:</Label>
                       <input type="text" value={bgColor} />
                       <input type="color" value={bgColor} />
@@ -349,7 +332,7 @@ class IconPreview extends Component {
           </Segment>
         </Grid.Column>
         <Grid.Column>
-          <canvas id="canvas" width="1024" height="1024" ref={this.canvas}></canvas>
+          <canvas id="canvas" width={CANVAS_SIZE} height={CANVAS_SIZE} ref={this.canvas}></canvas>
         </Grid.Column>
         <Segment>
         All 3rd party brands, trademarks, trade-, product- and corporate-names, logos and other properties belong to their respective owners. By using our services, you agree not to violate any licenses and copyright laws.
