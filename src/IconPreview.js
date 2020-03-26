@@ -16,7 +16,7 @@ class IconPreview extends Component {
 
     this.state = {
       icon: { },
-      color: "#ff004f",
+      color: "#ff0078",
       size: 512,
       margin: 20,
       transparentBg: true,
@@ -302,7 +302,7 @@ class IconPreview extends Component {
               </Form.Field>
               <Form.Field>
                   <Input label="Color:" type="text" className="color-input" value={color} name="color" onChange={this.handleInputChange}>
-                    <Label>Color:</Label>
+                    <Label color="teal">Color:</Label>
                     <input type="text" value={color} />
                     <input type="color" value={color} />
                   </Input>
@@ -311,17 +311,17 @@ class IconPreview extends Component {
                   <Checkbox checked={transparentBg} className="transparent-bg-input" onChange={this.handleTransparentBgToggle} label="Transparent Background" />
                   {!transparentBg &&
                     <Input label="Background Color:" type="text" className="color-input" value={bgColor} name="bgColor" onChange={this.handleInputChange}>
-                      <Label>Background Color:</Label>
+                      <Label color="teal">Background Color:</Label>
                       <input type="text" value={bgColor} />
                       <input type="color" value={bgColor} />
                     </Input>
                   }
               </Form.Field>
               <Form.Field>
-                <label>
-                  Size: <span id="icon-size">{size}px <small>Adjusting size won't update preview, and only affects the downloading of the icon.</small></span>
+                <Label color="teal" size="big">
+                  Size: <span id="icon-size">{size}px<br /><small>Adjusting size won't update preview, and only affects the downloading of the icon.</small></span>
                   <Input type="range" min="32" max={CANVAS_SIZE} step="1" value={size} name="size" onChange={this.handleInputChange} />
-                </label>
+                </Label>
               </Form.Field>
               <Form.Field inline className="center">
                 <Button type="submit" size="big" color="teal">Download! <i className="fas fa-arrow-down" /></Button>
