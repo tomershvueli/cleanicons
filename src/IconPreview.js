@@ -18,7 +18,7 @@ class IconPreview extends Component {
       icon: { },
       color: "#ff004f",
       size: 512,
-      margin: 0,
+      margin: 20,
       transparentBg: true,
       bgColor: "#ffffff",
       icons: [],
@@ -297,7 +297,7 @@ class IconPreview extends Component {
               <Form.Field>
                 <label>
                   Margin: <span id="icon-margin">{margin}px</span>
-                  <Input type="range" min="0" max="50" step="1" value={margin} name="margin" onChange={this.handleInputChange} />
+                  <Input type="range" min="0" max="100" step="1" value={margin} name="margin" onChange={this.handleInputChange} />
                 </label>
               </Form.Field>
               <Form.Field>
