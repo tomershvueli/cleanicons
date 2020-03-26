@@ -114,7 +114,8 @@ class IconPreview extends Component {
       curCanvas = document.createElement('canvas');
     }
 
-    const { icon, size, color, transparentBg, bgColor } = this.state;
+    const { icon, size, margin, color, transparentBg, bgColor } = this.state;
+    const dpr = window.devicePixelRatio;
     const boundingBoxX = icon.xMax - icon.xMin;
     const boundingBoxY = icon.yMax - icon.yMin;
     const tallerThanWide = boundingBoxY > boundingBoxX;
@@ -124,6 +125,8 @@ class IconPreview extends Component {
       const ctx = curCanvas.getContext("2d");
       const canvasWidth = (isDownloadCanvas) ? size : CANVAS_SIZE;
       const canvasHeight = canvasWidth;
+      const marginMultiplier = (isDownloadCanvas) ? 1 : dpr;
+      const sizeToMatch = canvasWidth - (margin * marginMultiplier * 2);
       curCanvas.width = curCanvas.height = canvasWidth;
       let curFontSize = canvasWidth;
 
@@ -148,8 +151,6 @@ class IconPreview extends Component {
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
       }
 
-      const dpr = window.devicePixelRatio;
-
       const textString = String.fromCharCode(parseInt(this.formatUnicode(icon.unicode), 16));
 
       let sizedToFit, textWidth, step = 5;
@@ -164,7 +165,7 @@ class IconPreview extends Component {
           if (tallerThanWide) {
             // Check that our y bounding box matches our height
             const yBoundingBox = Math.floor(measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
-            const diff = yBoundingBox - canvasHeight;
+            const diff = yBoundingBox - sizeToMatch;
             if (Math.abs(diff) < 10) {
               // When we get closer to the actual size we need, let's lower the step
               // With a step of 1, there were some cases (backspace, school) where this would create an infinite loop between a bounding box size of 1023 and 1025, so half step :)
@@ -180,7 +181,7 @@ class IconPreview extends Component {
           } else {
             // Check that our x bounding box matches our width
             const xBoundingBox = Math.floor(measure.actualBoundingBoxRight + measure.actualBoundingBoxLeft);
-            const diff = xBoundingBox - canvasWidth;
+            const diff = xBoundingBox - sizeToMatch;
             if (Math.abs(diff) < 10) {
               step = .5;
             }
@@ -293,7 +294,7 @@ class IconPreview extends Component {
                   />
                 </label>
               </Form.Field>
-              <Form.Field hidden>
+              <Form.Field>
                 <label>
                   Margin: <span id="icon-margin">{margin}px</span>
                   <Input type="range" min="0" max="50" step="1" value={margin} name="margin" onChange={this.handleInputChange} />
