@@ -18,3 +18,8 @@
   padding-top: 25px;
   margin-bottom: 25px;
 }
+
+#github-link-wrap a {
+  font-size: 25px;
+  color: inherit;
+}

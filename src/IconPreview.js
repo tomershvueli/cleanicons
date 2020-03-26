@@ -162,10 +162,13 @@ class IconPreview extends Component {
         if (measure.actualBoundingBoxRight) {
           // We're on a browser that supports bounding box
           if (tallerThanWide) {
+            console.log("taller")
             // Check that our y bounding box matches our height
             const yBoundingBox = Math.floor(measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
             const diff = yBoundingBox - canvasHeight;
             if (Math.abs(diff) < 10) {
+              // When we get closer to the actual size we need, let's lower the step
+              // With a step of 1, there were some cases (backspace, school) where this would create an infinite loop between a bounding box size of 1023 and 1025, so half step :)
               step = .5;
             }
             if (diff < 0) {
@@ -173,11 +176,12 @@ class IconPreview extends Component {
             } else if (diff > 0) {
               curFontSize -= step;
             } else {
-              // canvasHeightOffset = yBoundingBox / 2;
+              canvasHeightOffset = canvasHeight / 8;
               console.log(measure)
               sizedToFit = true;
             }
           } else {
+            console.log("not taller")
             // Check that our x bounding box matches our width
             const xBoundingBox = Math.floor(measure.actualBoundingBoxRight + measure.actualBoundingBoxLeft);
             const diff = xBoundingBox - canvasWidth;
@@ -189,7 +193,7 @@ class IconPreview extends Component {
             } else if (diff > 0) {
               curFontSize -= step;
             } else {
-              canvasHeightOffset = icon.yMin / 2;
+              canvasHeightOffset = ((measure.actualBoundingBoxAscent - measure.actualBoundingBoxDescent) / 6) + icon.yMin;
               console.log(measure)
               sizedToFit = true;
             }
@@ -203,8 +207,9 @@ class IconPreview extends Component {
       // TODO draw margin, be sure to fit to size, https://stackoverflow.com/questions/20551534/size-to-fit-font-on-a-canvas
       // https://jsfiddle.net/tomers13/km43p5bv/
       ctx.fillStyle = color;
-      const yPos = canvasHeight - (canvasHeight / 8) - canvasHeightOffset;
-      console.log(`bounding box: ${boundingBoxY}, cur draw pos: ${yPos}, prev draw pos: ${canvasHeight - (canvasHeight / 8)}, offset: ${canvasHeightOffset}`);
+      const measure = ctx.measureText(textString);
+      const yPos = canvasHeight - canvasHeightOffset;
+      console.log(`ydiff: ${icon.yMax - icon.yMin}, bounding box: ${measure.actualBoundingBoxAscent - measure.actualBoundingBoxDescent}, offset: ${canvasHeightOffset}, cur draw pos: ${yPos}`);
       ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), yPos);
 
       ctx.scale = dpr;
@@ -239,6 +244,7 @@ class IconPreview extends Component {
   }
 
   handleIconChange(icon) {
+    console.log(icon)
     this.setState({
       icon
     });
@@ -287,19 +293,13 @@ class IconPreview extends Component {
                 <label>
                   Icon:
                   <Select
-                    loading={this.state.fontsLoaded}
+                    loading={fontsLoaded}
                     filterOption={createFilter({ ignoreAccents: false })}
                     onChange={this.handleIconChange}
                     options={icons}
-                    defaultInputValue={icon.label}
+                    value={icon}
                     components={ {Option: this.customOptionComponent } }
                   />
-                </label>
-              </Form.Field>
-              <Form.Field>
-                <label>
-                  Size: <span id="icon-size">{size}px</span>
-                  <Input type="range" min="32" max={CANVAS_SIZE} step="1" value={size} name="size" onChange={this.handleInputChange} />
                 </label>
               </Form.Field>
               <Form.Field hidden>
@@ -325,6 +325,12 @@ class IconPreview extends Component {
                     </Input>
                   }
               </Form.Field>
+              <Form.Field>
+                <label>
+                  Size: <span id="icon-size">{size}px <small>Adjusting size won't update preview, and only affects the downloading of the icon.</small></span>
+                  <Input type="range" min="32" max={CANVAS_SIZE} step="1" value={size} name="size" onChange={this.handleInputChange} />
+                </label>
+              </Form.Field>
               <Form.Field inline className="center">
                 <Button type="submit" size="big" color="teal">Download! <i className="fas fa-arrow-down" /></Button>
               </Form.Field>
@@ -332,7 +338,9 @@ class IconPreview extends Component {
           </Segment>
         </Grid.Column>
         <Grid.Column>
-          <canvas id="canvas" width={0} height={0} ref={this.canvas}></canvas>
+          {fontsLoaded &&
+            <canvas id="canvas" width={0} height={0} ref={this.canvas}></canvas>
+          }
         </Grid.Column>
         <Segment>
         All 3rd party brands, trademarks, trade-, product- and corporate-names, logos and other properties belong to their respective owners. By using our services, you agree not to violate any licenses and copyright laws.

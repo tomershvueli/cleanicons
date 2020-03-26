@@ -22,3 +22,8 @@
 #canvas {
   border:1px solid rgb(65, 65, 65); margin:0 auto;
 }
+
+#icon-size small {
+  font-size: 10px;
+  font-style: italic;
+}
