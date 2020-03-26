@@ -152,7 +152,7 @@ class IconPreview extends Component {
 
       const textString = String.fromCharCode(parseInt(this.formatUnicode(icon.unicode), 16));
 
-      let sizedToFit, textWidth, canvasHeightOffset = 0, step = 5;
+      let sizedToFit, textWidth, step = 5;
 
       do {
         const font = `900 ${curFontSize}px "${icon.fontFamily}"`;
@@ -162,7 +162,6 @@ class IconPreview extends Component {
         if (measure.actualBoundingBoxRight) {
           // We're on a browser that supports bounding box
           if (tallerThanWide) {
-            console.log("taller")
             // Check that our y bounding box matches our height
             const yBoundingBox = Math.floor(measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
             const diff = yBoundingBox - canvasHeight;
@@ -176,12 +175,9 @@ class IconPreview extends Component {
             } else if (diff > 0) {
               curFontSize -= step;
             } else {
-              canvasHeightOffset = canvasHeight / 8;
-              console.log(measure)
               sizedToFit = true;
             }
           } else {
-            console.log("not taller")
             // Check that our x bounding box matches our width
             const xBoundingBox = Math.floor(measure.actualBoundingBoxRight + measure.actualBoundingBoxLeft);
             const diff = xBoundingBox - canvasWidth;
@@ -193,8 +189,6 @@ class IconPreview extends Component {
             } else if (diff > 0) {
               curFontSize -= step;
             } else {
-              canvasHeightOffset = ((measure.actualBoundingBoxAscent - measure.actualBoundingBoxDescent) / 6) + icon.yMin;
-              console.log(measure)
               sizedToFit = true;
             }
           }
@@ -207,10 +201,8 @@ class IconPreview extends Component {
       // TODO draw margin, be sure to fit to size, https://stackoverflow.com/questions/20551534/size-to-fit-font-on-a-canvas
       // https://jsfiddle.net/tomers13/km43p5bv/
       ctx.fillStyle = color;
-      const measure = ctx.measureText(textString);
-      const yPos = canvasHeight - canvasHeightOffset;
-      console.log(`ydiff: ${icon.yMax - icon.yMin}, bounding box: ${measure.actualBoundingBoxAscent - measure.actualBoundingBoxDescent}, offset: ${canvasHeightOffset}, cur draw pos: ${yPos}`);
-      ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), yPos);
+      ctx.textBaseline = "middle";
+      ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvasHeight / 2);
 
       ctx.scale = dpr;
       curCanvas.style.width = `${canvasWidth / dpr}px`;
@@ -244,7 +236,6 @@ class IconPreview extends Component {
   }
 
   handleIconChange(icon) {
-    console.log(icon)
     this.setState({
       icon
     });
