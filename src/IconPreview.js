@@ -334,9 +334,6 @@ class IconPreview extends Component {
             <canvas id="canvas" width={0} height={0} ref={this.canvas}></canvas>
           }
         </Grid.Column>
-        <Segment>
-        All 3rd party brands, trademarks, trade-, product- and corporate-names, logos and other properties belong to their respective owners. By using our services, you agree not to violate any licenses and copyright laws.
-        </Segment>
       </Grid>
     );
   }

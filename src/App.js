@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Header, Container, Menu } from 'semantic-ui-react';
+import { Header, Container, Menu, Segment } from 'semantic-ui-react';
 import './App.css';
 
 import IconPreview from './IconPreview';
@@ -20,7 +20,7 @@ class App extends Component {
                 textAlign="left"
                 as="h1"
               >
-                <i className="fas fa-adjust" />leanIcons
+                Cleanic<i className="fas fa-adjust" />ns
               </Header>
             </Menu.Item>
             <Menu.Menu position='right'>
@@ -35,6 +35,9 @@ class App extends Component {
             </Menu.Menu>
           </Menu>
           <IconPreview />
+          <Segment>
+            All 3rd party brands, trademarks, trade-, product- and corporate-names, logos and other properties belong to their respective owners. By using this service, you agree not to violate any licenses and copyright laws.
+          </Segment>
         </Container>
         <Footer />
       </div>

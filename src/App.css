@@ -3,9 +3,12 @@
 }
 
 .container {
-  min-height: 100%;
   /* equal to footer height */
   margin-bottom: -60px; 
+}
+
+#brand i {
+  font-size: 20px;
 }
 
 .container:after {
