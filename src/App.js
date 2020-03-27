@@ -3,6 +3,7 @@ import { Header, Container, Menu, Segment } from 'semantic-ui-react';
 import './App.css';
 
 import IconPreview from './IconPreview';
+import KoFi from './KoFi';
 import Footer from './Footer';
 
 class App extends Component {
@@ -31,6 +32,9 @@ class App extends Component {
                 <a href="https://github.com/tomershvueli/cleanicons">
                   <i className="fab fa-github"></i>
                 </a>
+              </Menu.Item>
+              <Menu.Item>
+                <KoFi color="#00b5ad" id="D1D41JRJE" label="Buy me a Ko-fi" />
               </Menu.Item>
             </Menu.Menu>
           </Menu>

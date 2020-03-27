@@ -352,7 +352,9 @@ class IconPreview extends Component {
             </Form>
           </Segment>
         </Grid.Column>
-        <Grid.Column>
+        <Grid.Column
+          textAlign="center"
+        >
           {fontsLoaded &&
             <canvas id="canvas" width={0} height={0} ref={this.canvas}></canvas>
           }
