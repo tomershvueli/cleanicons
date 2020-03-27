@@ -6,6 +6,20 @@ import { Grid, Segment, Form, Button, Checkbox, Input, Label } from 'semantic-ui
 const opentype = require('opentype.js');
 
 const CANVAS_SIZE = 1024;
+const FONTS = [
+  {
+    preferredFamily: "Font Awesome 5 Free",
+    fontFamily: "Font Awesome 5 Free Solid",
+    path: "fonts/fa-solid-900.ttf",
+    baseClass: "fas"
+  },
+  {
+    preferredFamily: "Font Awesome 5 Brands",
+    fontFamily: "Font Awesome 5 Brands Regular",
+    path: "fonts/fa-brands-400.ttf",
+    baseClass: "fab"
+  }
+];
 
 class IconPreview extends Component {
 
@@ -34,27 +48,36 @@ class IconPreview extends Component {
   }
 
   componentDidMount() {
-    const fontAwesomeRegular = '900 48px "Font Awesome 5 Free"';
-    const fontAwesomeBrand = '900 48px "Font Awesome 5 Brands"';
+    const fontsLoadPromises = [];
+    for (let font of FONTS) {
+      const load = document.fonts.load(`900 48px "${font.preferredFamily}"`);
+      fontsLoadPromises.push(load);
+    }
 
     // Load up both fonts before we start to render the canvas
-    const loadFonts = Promise.all([document.fonts.load(fontAwesomeRegular), document.fonts.load(fontAwesomeBrand)]);
+    const loadFonts = Promise.all(fontsLoadPromises);
     loadFonts.then((_) => {
       this.loadFonts();
     });
   }
 
   async loadFonts() {
-    const fonts = [await this.loadFont('fonts/fa-solid-900.ttf'), await this.loadFont('fonts/fa-brands-400.ttf')];
+    const fonts = [];
+    for (let font of FONTS) {
+      const load = await this.loadFont(font.path);
+      fonts.push(load);
+    }
 
     let tempIcons = [], defaultIcon;
 
     for (let font of fonts) {
-      const fontFamily = font.names.preferredFamily.en;
+      const fontFamily = font.names.fontFamily.en;
+      const fontPreferred = font.names.preferredFamily.en;
+
       for (const glyph in font.glyphs.glyphs) {
         if (font.glyphs.glyphs.hasOwnProperty(glyph)) {
           const element = font.glyphs.glyphs[glyph];
-          const baseClass = (fontFamily === 'Font Awesome 5 Free') ? 'fas' : 'fab';
+          const baseClass = FONTS.find(font => font.fontFamily === fontFamily).baseClass;
 
           if (element.unicode) {
             // We're looking at a 'real' icon
@@ -63,7 +86,7 @@ class IconPreview extends Component {
               key: element.index,
               value: element.name,
               label: element.name,
-              fontFamily,
+              fontFamily: fontPreferred,
               baseClass
             }
             tempIcons.push(icon);
