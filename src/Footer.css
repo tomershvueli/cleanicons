@@ -3,6 +3,10 @@ footer {
   text-align: center;
 }
 
+footer a, footer a:hover {
+  color: inherit;
+}
+
 footer p {
   line-height: 60px;;
 }

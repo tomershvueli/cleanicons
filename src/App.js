@@ -34,7 +34,7 @@ class App extends Component {
                 </a>
               </Menu.Item>
               <Menu.Item>
-                <KoFi color="#00b5ad" id="D1D41JRJE" label="Buy me a Ko-fi" />
+                <KoFi color="#00b5ad" id="D1D41JRJE" label="Buy me a Coffee" />
               </Menu.Item>
             </Menu.Menu>
           </Menu>

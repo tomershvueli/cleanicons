@@ -61,6 +61,12 @@ class IconPreview extends Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.size === this.state.size) {
+      this.drawCanvasContent();
+    }
+  }
+
   async loadFonts() {
     const fonts = [];
     for (let font of FONTS) {
@@ -144,7 +150,6 @@ class IconPreview extends Component {
     const tallerThanWide = boundingBoxY > boundingBoxX;
 
     if (curCanvas) {
-      console.log("drawing")
       const ctx = curCanvas.getContext("2d");
       const canvasWidth = (isDownloadCanvas) ? size : CANVAS_SIZE;
       const canvasHeight = canvasWidth;
@@ -293,8 +298,6 @@ class IconPreview extends Component {
   }
 
   render() {
-    this.drawCanvasContent();
-
     const { fontsLoaded, icons, icon, size, margin, color, transparentBg, bgColor } = this.state;
 
     return (
@@ -326,8 +329,8 @@ class IconPreview extends Component {
               <Form.Field>
                   <Input label="Color:" type="text" className="color-input" value={color} name="color" onChange={this.handleInputChange}>
                     <Label color="teal">Color:</Label>
-                    <input type="text" value={color} />
-                    <input type="color" value={color} />
+                    <input type="text" name="color" value={color} />
+                    <input type="color" name="color" value={color} />
                   </Input>
               </Form.Field>
               <Form.Field>
@@ -343,7 +346,7 @@ class IconPreview extends Component {
               <Form.Field>
                 <Label color="teal" size="big">
                   Size: <span id="icon-size">{size}px<br /><small>Adjusting size won't update preview, and only affects the downloading of the icon.</small></span>
-                  <Input type="range" min="32" max={CANVAS_SIZE} step="1" value={size} name="size" onChange={this.handleInputChange} />
+                  <Input type="range" name="size" min="32" max={CANVAS_SIZE} step="1" value={size} name="size" onChange={this.handleInputChange} />
                 </Label>
               </Form.Field>
               <Form.Field inline className="center">
