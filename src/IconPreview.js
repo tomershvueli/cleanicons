@@ -292,7 +292,7 @@ class IconPreview extends Component {
     return (
       <components.Option {...newProps} className="select-option">
         {props.children}
-        <span className="icon-wrap">{data.label && <i className={`${data.baseClass} fa-${data.label}`} />}</span>
+        {data.label && <span className="icon-wrap"><span className={`${data.baseClass} fa-${data.label}`} /></span>}
       </components.Option>
     );
   }
@@ -346,7 +346,7 @@ class IconPreview extends Component {
               <Form.Field>
                 <Label color="teal" size="big">
                   Size: <span id="icon-size">{size}px<br /><small>Adjusting size won't update preview, and only affects the downloading of the icon.</small></span>
-                  <Input type="range" name="size" min="32" max={CANVAS_SIZE} step="1" value={size} name="size" onChange={this.handleInputChange} />
+                  <Input type="range" name="size" min="32" max={CANVAS_SIZE} step="1" value={size} onChange={this.handleInputChange} />
                 </Label>
               </Form.Field>
               <Form.Field inline className="center">

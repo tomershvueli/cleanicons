@@ -21,7 +21,7 @@ class App extends Component {
                 textAlign="left"
                 as="h1"
               >
-                Cleanic<i className="fas fa-adjust" />ns
+                Cleanicons
               </Header>
             </Menu.Item>
             <Menu.Menu position='right'>
