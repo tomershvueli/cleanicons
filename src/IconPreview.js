@@ -250,18 +250,16 @@ class IconPreview extends Component {
     const cleanColor = color.replace('#', '');
     const downloadFileName = `CleanIcons_${icon.label}_${size}px_${cleanColor}.png`;
 
-    canvas.toBlob(function(blob) {
-      let link = document.createElement('a');
-      link.download = downloadFileName;
-  
-      link.href = URL.createObjectURL(blob);
-      link.click((e) => {
-        e.preventDefault();
-      });
-  
-      // Delete the internal blob reference, to let the browser clear memory from it
-      URL.revokeObjectURL(link.href);
-    }, 'image/png');
+    let link = document.createElement('a');
+    link.download = downloadFileName;
+
+    link.href = canvas.toDataURL("image/png")
+    link.click((e) => {
+      e.preventDefault();
+    });
+
+    // Delete the internal blob reference, to let the browser clear memory from it
+    URL.revokeObjectURL(link.href);
   }
 
   handleIconChange(icon) {
