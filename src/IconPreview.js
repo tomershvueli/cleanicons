@@ -5,7 +5,7 @@ import { Grid, Segment, Form, Button, Checkbox, Input, Label } from 'semantic-ui
 
 const opentype = require('opentype.js');
 
-const CANVAS_SIZE = 1024;
+const MAX_CANVAS_SIZE = 1024;
 const FONTS = [
   {
     preferredFamily: "Font Awesome 5 Free",
@@ -148,10 +148,12 @@ class IconPreview extends Component {
     const boundingBoxX = icon.xMax - icon.xMin;
     const boundingBoxY = icon.yMax - icon.yMin;
     const tallerThanWide = boundingBoxY > boundingBoxX;
+    let canvasSize = document.getElementById("canvas-wrap").getBoundingClientRect().width * dpr;
+    canvasSize = (canvasSize > MAX_CANVAS_SIZE) ? MAX_CANVAS_SIZE : canvasSize;
 
     if (curCanvas) {
       const ctx = curCanvas.getContext("2d");
-      const canvasWidth = (isDownloadCanvas) ? size : CANVAS_SIZE;
+      const canvasWidth = (isDownloadCanvas) ? size : canvasSize;
       const canvasHeight = canvasWidth;
       const marginMultiplier = (isDownloadCanvas) ? 1 : dpr;
       const sizeToMatch = canvasWidth - (margin * marginMultiplier * 2);
@@ -227,8 +229,6 @@ class IconPreview extends Component {
         }
       } while (!sizedToFit);
 
-      // TODO draw margin, be sure to fit to size, https://stackoverflow.com/questions/20551534/size-to-fit-font-on-a-canvas
-      // https://jsfiddle.net/tomers13/km43p5bv/
       ctx.fillStyle = color;
       ctx.textBaseline = "middle";
       ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvasHeight / 2);
@@ -344,7 +344,7 @@ class IconPreview extends Component {
               <Form.Field>
                 <Label color="teal" size="big">
                   Size: <span id="icon-size">{size}px<br /><small>Adjusting size won't update preview, and only affects the downloading of the icon.</small></span>
-                  <Input type="range" name="size" min="32" max={CANVAS_SIZE} step="1" value={size} onChange={this.handleInputChange} />
+                  <Input type="range" name="size" min="32" max={MAX_CANVAS_SIZE} step="1" value={size} onChange={this.handleInputChange} />
                 </Label>
               </Form.Field>
               <Form.Field inline className="center">
@@ -356,9 +356,11 @@ class IconPreview extends Component {
         <Grid.Column
           textAlign="center"
         >
-          {fontsLoaded &&
-            <canvas id="canvas" width={0} height={0} ref={this.canvas}></canvas>
-          }
+          <div id="canvas-wrap">
+            {fontsLoaded &&
+              <canvas id="canvas" width={0} height={0} ref={this.canvas}></canvas>
+            }
+          </div>
         </Grid.Column>
       </Grid>
     );
