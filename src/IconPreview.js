@@ -183,7 +183,7 @@ class IconPreview extends Component {
 
       const textString = String.fromCharCode(parseInt(this.formatUnicode(icon.unicode), 16));
 
-      let sizedToFit, textWidth, step = 5;
+      let sizedToFit, textWidth, step = 5, iterations = 0;
 
       do {
         const font = `900 ${curFontSize}px "${icon.fontFamily}"`;
@@ -227,7 +227,10 @@ class IconPreview extends Component {
           // We don't support bounding box, this is as good as we're gonna get
           sizedToFit = true;
         }
-      } while (!sizedToFit);
+
+        // We don't need to try this out more than 50 times at most
+        iterations++;
+      } while (!sizedToFit && iterations < 50);
 
       ctx.fillStyle = color;
       ctx.textBaseline = "middle";
