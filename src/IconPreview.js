@@ -145,9 +145,6 @@ class IconPreview extends Component {
 
     const { icon, size, margin, color, transparentBg, bgColor } = this.state;
     const dpr = window.devicePixelRatio;
-    const boundingBoxX = icon.xMax - icon.xMin;
-    const boundingBoxY = icon.yMax - icon.yMin;
-    const tallerThanWide = boundingBoxY > boundingBoxX;
     let canvasSize = document.getElementById("canvas-wrap").getBoundingClientRect().width * dpr;
     canvasSize = (canvasSize > MAX_CANVAS_SIZE) ? MAX_CANVAS_SIZE : canvasSize;
 
@@ -158,7 +155,6 @@ class IconPreview extends Component {
       const marginMultiplier = (isDownloadCanvas) ? 1 : dpr;
       const sizeToMatch = canvasWidth - (margin * marginMultiplier * 2);
       curCanvas.width = curCanvas.height = canvasWidth;
-      let curFontSize = canvasWidth;
 
       // Clear canvas first
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -183,58 +179,13 @@ class IconPreview extends Component {
 
       const textString = String.fromCharCode(parseInt(this.formatUnicode(icon.unicode), 16));
 
-      let sizedToFit, textWidth, step = 5, iterations = 0;
-
-      do {
-        const font = `900 ${curFontSize}px "${icon.fontFamily}"`;
-        ctx.font = font;
-        const measure = ctx.measureText(textString);
-        textWidth = measure.width;
-        if (measure.actualBoundingBoxRight) {
-          // We're on a browser that supports bounding box
-          if (tallerThanWide) {
-            // Check that our y bounding box matches our height
-            const yBoundingBox = Math.floor(measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
-            const diff = yBoundingBox - sizeToMatch;
-            if (Math.abs(diff) < 10) {
-              // When we get closer to the actual size we need, let's lower the step
-              // With a step of 1, there were some cases (backspace, school) where this would create an infinite loop between a bounding box size of 1023 and 1025, so half step :)
-              step = .5;
-            }
-            if (diff < 0) {
-              curFontSize += step;
-            } else if (diff > 0) {
-              curFontSize -= step;
-            } else {
-              sizedToFit = true;
-            }
-          } else {
-            // Check that our x bounding box matches our width
-            const xBoundingBox = Math.floor(measure.actualBoundingBoxRight + measure.actualBoundingBoxLeft);
-            const diff = xBoundingBox - sizeToMatch;
-            if (Math.abs(diff) < 10) {
-              step = .5;
-            }
-            if (diff < 0) {
-              curFontSize += step;
-            } else if (diff > 0) {
-              curFontSize -= step;
-            } else {
-              sizedToFit = true;
-            }
-          }
-        } else {
-          // We don't support bounding box, this is as good as we're gonna get
-          sizedToFit = true;
-        }
-
-        // We don't need to try this out more than 50 times at most
-        iterations++;
-      } while (!sizedToFit && iterations < 50);
+      const font = `900 ${sizeToMatch}px "${icon.fontFamily}"`;
+      ctx.font = font;
+      const measure = ctx.measureText(textString);
 
       ctx.fillStyle = color;
       ctx.textBaseline = "middle";
-      ctx.fillText(textString, (canvasWidth/2) - (textWidth / 2), canvasHeight / 2);
+      ctx.fillText(textString, (canvasWidth/2) - (measure.width / 2), canvasHeight / 2);
 
       ctx.scale = dpr;
       curCanvas.style.width = `${canvasWidth / dpr}px`;
@@ -324,7 +275,7 @@ class IconPreview extends Component {
               <Form.Field>
                 <label>
                   Margin: <span id="icon-margin">{margin}px</span>
-                  <Input type="range" min="0" max="100" step="1" value={margin} name="margin" onChange={this.handleInputChange} />
+                  <Input type="range" min="-20" max="100" step="1" value={margin} name="margin" onChange={this.handleInputChange} />
                 </label>
               </Form.Field>
               <Form.Field>
