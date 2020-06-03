@@ -202,7 +202,7 @@ class IconPreview extends Component {
     const canvas = this.drawCanvasContent(true);
     const { icon, size, color } = this.state;
     const cleanColor = color.replace('#', '');
-    const downloadFileName = `CleanIcons_${icon.label}_${size}px_${cleanColor}.png`;
+    const downloadFileName = `CleanIcons_${icon.value}_${size}px_${cleanColor}.png`;
 
     let link = document.createElement('a');
     link.download = downloadFileName;
@@ -244,7 +244,7 @@ class IconPreview extends Component {
     return (
       <components.Option {...newProps} className="select-option">
         {props.children}
-        {data.label && <span className="icon-wrap"><span className={`${data.baseClass} fa-${data.label}`} /></span>}
+        {data.value && <span className="icon-wrap"><span className={`${data.baseClass} fa-${data.value}`} /></span>}
       </components.Option>
     );
   }
